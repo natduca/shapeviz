@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="import" href="../third_party/polymer/polymer-element.html">
+  <link rel="import" href="../src/shapeviz_element.html">
+</head>
+<body>
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelector('#sv-main').load(
+        document.querySelector('#sv-data').textContent);
+    });
+  </script>
+  <shapeviz-element id="sv-main">
+  </shapeviz-element>
+  <script id="sv-data" type="application/text">
+1,9,ColorLayer,None,Unknown/None,Default,1/4,5/8,1/2,1/8,N/A,N/A,BufferLayer,None,RGBx_8888,Default,0,0,1,1,1,1,BufferLayer,None,RGB_565,(deprecated) BT709 SMPTE_170M Limited range,1/4,5/8,1/2,1/8,1/4,1/4,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,1/4,0,3/4,7/8,1/2,1/2,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,7/8,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,7/8,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1,1,1
+3,9,ColorLayer,None,Unknown/None,Default,0,5/8,1/2,1/8,N/A,N/A,BufferLayer,None,RGBx_8888,Default,0,0,1,1,1,1,BufferLayer,None,RGB_565,(deprecated) BT709 SMPTE_170M Limited range,0,5/8,1/2,1/8,1/4,1/4,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,7/8,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,7/8,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1,1/2,1/2,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1,1,1
+28,6,BufferLayer,None,RGB_565,(deprecated) BT709 SMPTE_170M Limited range,0,3/4,1/2,1/8,1/4,1/4,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,7/8,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,7/8,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1,1,1
+96,6,BufferLayer,None,RGB_565,(deprecated) BT709 SMPTE_170M Limited range,1/2,3/4,1/2,1/8,1/4,1/4,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,7/8,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,7/8,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1/8,1,1,BufferLayer,None,RGBA_8888,(deprecated) sRGB Linear Full range,0,0,1,1,1,1
+  </script>
+</body>
+</html>

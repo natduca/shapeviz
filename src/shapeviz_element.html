@@ -1,0 +1,27 @@
+<link rel="import" href="../third_party/polymer/polymer-element.html">
+<dom-module id="shapeviz-element">
+
+  <template>
+    <style>
+      div {
+        display: block;
+      }
+    </style>
+    <div>
+      <!-- any children are rendered here -->
+      hello world
+    </div>
+  </template>
+
+  <script>
+    class ShapeVizElement extends Polymer.Element {
+      static get is() { return "shapeviz-element"; }
+
+      load() {
+        console.log("hello world");
+      }
+    }
+    customElements.define(ShapeVizElement.is, ShapeVizElement);
+  </script>
+
+</dom-module>
