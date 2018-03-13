@@ -1,0 +1,96 @@
+<script>
+class Layer {
+  constructor() {
+    this.dstX = 0;
+    this.dstY = 0;
+    this.dstWidth = 0;
+    this.dstHeight = 0;
+    this.otherAttrs = {};
+  }
+
+  ratioToFloat(s) {
+    let m = /(\d+)\/(\d+)/.exec(s);
+    if (m) {
+      return parseInt(m[1]) / parseInt(m[2]);
+    }
+    let v = parseInt(s);
+    if (isNaN(v))
+      throw new Error('omg no');
+    return v;
+  }
+
+  initFromRecords(records) {
+    var nameToOffset = {
+      layerType: 0,
+      transform: 1,
+      pixelFormat: 2,
+      dataSpace: 3,
+      dstX: 4,
+      dstY: 5,
+      dstWidth: 6,
+      dstHeight: 7,
+      scaleW: 8,
+      scaleH: 9
+    }
+    function getField(name){
+      return records[nameToOffset[name]];
+    }
+    function getFieldName(idx){
+      for (let k in nameToOffset) {
+        if (nameToOffset[k] === idx)
+          return k;
+      }
+      return undefined;
+    }
+
+    this.dstX = this.ratioToFloat(getField('dstX'));
+    this.dstY = this.ratioToFloat(getField('dstY'));
+    this.dstWidth = this.ratioToFloat(getField('dstWidth'));
+    this.dstHeight = this.ratioToFloat(getField('dstHeight'));
+    for (let i = 0; i < records; i++) {
+      let fn = getFieldName[i];
+      if (fn === undefined) {
+        console.log("unknown field");
+        continue;
+      }
+      this.otherAttrs[fn] = records[i];
+    }
+  }
+}
+class Shape {
+  constructor() {
+    this.frequency = 0;
+    this.layers = [];
+  }
+}
+
+class Model {
+  constructor() {
+    this.shapes = [];
+  }
+  loadCSV(data) {
+    let lines = data.split('\n');
+    lines.forEach(function(line) {
+      line = line.trim();
+      if (line.length === 0)
+        return;
+      let records = line.split(',');
+
+
+      let numLayers = parseInt(records[1]);
+      var numPropsInLayer = (records.length - 2) / numLayers;
+      let shape = new Shape();
+      shape.frequency = parseInt(records[0]);
+      for (let i = 0; i < numLayers; i++) {
+        let baseIndex = (i * numPropsInLayer) + 2;
+        let layerRecords = records.slice(baseIndex,
+                                         baseIndex + numPropsInLayer);
+        let layer = new Layer();
+        layer.initFromRecords(layerRecords);
+        shape.layers.push(layer);
+      }
+      this.shapes.push(shape);
+    }, this);
+  }
+}
+</script>

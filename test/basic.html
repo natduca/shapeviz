@@ -3,11 +3,26 @@
 <head>
   <link rel="import" href="../third_party/polymer/polymer-element.html">
   <link rel="import" href="../src/shapeviz_element.html">
+  <style>
+  html {
+    height:100%;
+  }
+  body {
+    margin: 0;
+    height: 100%;
+    display: flex;
+  }
+  #sv-main {
+    flex: 1 1 auto;
+  }
+  </style>
 </head>
 <body>
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      document.querySelector('#sv-main').load(
+      let svMain = document.querySelector('#sv-main');
+      svMain.title = 'Basic test data';
+      svMain.loadCSV(
         document.querySelector('#sv-data').textContent);
     });
   </script>

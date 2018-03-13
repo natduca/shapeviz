@@ -1,15 +1,74 @@
 <link rel="import" href="../third_party/polymer/polymer-element.html">
+<link rel="import" href="./model.html">
+<link rel="import" href="./shapeviewer_element.html">
 <dom-module id="shapeviz-element">
 
   <template>
     <style>
-      div {
+      :host {
+        display: flex;
+        flex-direction: column;
+      }
+      #header {
+        flex: 0 0 auto;
         display: block;
+        backgorund-color: rgb(175,175,175);
+        border-bottom: rgb(64,64,64);
+      }
+      hbox {
+        flex: 1 1 auto;
+        border:1px solid red;
+        display: flex;
+        flex-direction: row;
+      }
+      vbox {
+        border:1px solid red;
+        display: flex;
+        flex-direction: column;
+      }
+      hbar {
+        display: block;
+        background-color: rgb(175,175,175);
+        height: 8px;
+        border-top: rgb(230,230,230);
+        border-bottom: rgb(64, 64, 64);
+      }
+      vbar {
+        display: block;
+        width: 8px;
+        background-color: rgb(175,175,175);
+        border-left: rgb(230,230,230);
+        border-right: rgb(64, 64, 64);
+      }
+      #shapeList {
+        flex: 0 0 300px;
+        display: block;
+        overflow-y: auto;
+      }
+      hbox > vbox {
+        flex: 1 1 auto;
+      }
+      #shapeViewer {
+        flex: 1 1 auto;
+      }
+      #selectionInfo {
+        flex: 0 0 auto;
+        height: 300px;
       }
     </style>
-    <div>
-      <!-- any children are rendered here -->
-      hello world
+    <div id="header"></div>
+    <hbox>
+      <div id="shapeList">
+      </div>
+      <vbar></vbar>
+      <vbox>
+        <shapeviewer-element id="shapeViewer">
+        </shapeviewer-element>
+        <hbar></hbar>
+        <div id="selectionInfo">
+        current selection
+        </div>
+      </vbox>
     </div>
   </template>
 
@@ -17,8 +76,53 @@
     class ShapeVizElement extends Polymer.Element {
       static get is() { return "shapeviz-element"; }
 
-      load() {
-        console.log("hello world");
+      constructor() {
+        super();
+        this.model = undefined;
+        this.selectedShape_ = undefined;
+      }
+
+      get title() {
+        return this.$.header.textContent;
+      }
+
+      set title(title) {
+        this.$.header.textContent = title;
+      }
+
+      loadCSV(data) {
+        let model = new Model();
+        model.loadCSV(data);
+        this.selectedShape = undefined;
+        this.model = model;
+        this.rebuildShapeList_();
+        this.selectedShape = this.model.shapes[0];
+      }
+
+      rebuildShapeList_() {
+        this.$.shapeList.textContent = '';
+        this.model.shapes.forEach(function(shape, shapeIdx) {
+          let shapeDiv = document.createElement('div');
+          shapeDiv.textContent = 'Shape ' + shapeIdx + ': ' + shape.frequency;
+          this.$.shapeList.appendChild(shapeDiv);
+          shapeDiv.addEventListener('click', function() {
+            this.selectedShape = shape;
+          }.bind(this));
+        }, this);
+      }
+
+      get selectedShape() {
+        return this.selectedShape_;
+      }
+      set selectedShape(selectedShape) {
+        this.selectedShape_ = selectedShape;
+        this.updateShapeViewer_();
+      }
+
+      updateShapeViewer_() {
+        this.$.shapeViewer.shape = this.selectedShape_;
+      }
+      updateSelectionInfo_() {
       }
     }
     customElements.define(ShapeVizElement.is, ShapeVizElement);

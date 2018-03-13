@@ -1,0 +1,67 @@
+<link rel="import" href="../third_party/polymer/polymer-element.html">
+<link rel="import" href="./model.html">
+<dom-module id="shapeviewer-element">
+
+  <template>
+    <style>
+      :host {
+        display: block;
+        overflow: auto;
+        min-width: 0;
+        min-height: 0;
+      }
+    </style>
+    <canvas id="canvas">
+    </canvas>
+  </template>
+  <script>
+    class ShapeViewerElement extends Polymer.Element {
+      static get is() { return "shapeviewer-element"; }
+
+      constructor() {
+        super();
+        this.textContent = "hello world";
+        this.shape_ = undefined;
+      }
+
+      get shape() {
+        return this.shape_;
+      }
+
+      set shape(shape) {
+        this.shape_ = shape;
+        this.redraw_();
+      }
+
+      redraw_() {
+        let r = this.getBoundingClientRect();
+        this.$.canvas.width = r.width;
+        this.$.canvas.height = r.height;
+        var ctx = this.$.canvas.getContext('2d');
+
+        var dpr = window.devicePixelRatio;
+        var w = this.$.canvas.width * dpr;
+        var h = this.$.canvas.height * dpr;
+
+        var smallestSide = Math.min(w,h);
+        var modelToScreenScaleFactor = smallestSide;
+
+        ctx.clearRect(0,0,w,h);
+
+        var shape = this.shape_;
+        if (!shape)
+          return;
+
+        shape.layers.forEach(function(layer) {
+          ctx.strokeStyle = 'green';
+          ctx.strkeWidth = '2px';
+          ctx.strokeRect(layer.dstX * modelToScreenScaleFactor,
+                       layer.dstY * modelToScreenScaleFactor,
+                       layer.dstWidth * modelToScreenScaleFactor,
+                       layer.dstHeight * modelToScreenScaleFactor);
+        }, this);
+      }
+    }
+    customElements.define(ShapeViewerElement.is, ShapeViewerElement);
+  </script>
+</dom-module>
