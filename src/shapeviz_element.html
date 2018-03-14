@@ -1,10 +1,14 @@
 <link rel="import" href="../third_party/polymer/polymer-element.html">
 <link rel="import" href="./model.html">
+<link rel="import" href="./utils.html">
 <link rel="import" href="./shapeviewer_element.html">
 <dom-module id="shapeviz-element">
 
   <template>
     <style>
+      * {
+        user-select: none;
+      }
       :host {
         display: flex;
         flex-direction: column;
@@ -17,14 +21,17 @@
       }
       hbox {
         flex: 1 1 auto;
-        border:1px solid red;
         display: flex;
         flex-direction: row;
       }
       vbox {
-        border:1px solid red;
         display: flex;
         flex-direction: column;
+      }
+      lbox {
+        display: flex;
+        flex-direction: column;
+        min-width: 300px;
       }
       hbar {
         display: block;
@@ -41,7 +48,12 @@
         border-right: rgb(64, 64, 64);
       }
       #shapeList {
-        flex: 0 0 300px;
+        flex: 1 1 300px;
+        display: block;
+        overflow-y: auto;
+      }
+      #layerList {
+        flex: 1 1 150px;
         display: block;
         overflow-y: auto;
       }
@@ -51,21 +63,33 @@
       #shapeViewer {
         flex: 1 1 auto;
       }
-      #selectionInfo {
+      #selectedLayerInfo {
         flex: 0 0 auto;
         height: 300px;
+        user-select: auto;
+        margin: 8px;
+      }
+      #selectedLayerInfo > div {
+        display: flex;
+      }
+      .item-selected {
+        background-color: rgb(185, 214, 251);
       }
     </style>
     <div id="header"></div>
     <hbox>
-      <div id="shapeList">
-      </div>
+      <lbox>
+        <div id="shapeList">
+        </div>
+        <div id="layerList">
+        </div>
+      </lbox>
       <vbar></vbar>
       <vbox>
         <shapeviewer-element id="shapeViewer">
         </shapeviewer-element>
         <hbar></hbar>
-        <div id="selectionInfo">
+        <div id="selectedLayerInfo">
         current selection
         </div>
       </vbox>
@@ -80,6 +104,7 @@
         super();
         this.model = undefined;
         this.selectedShape_ = undefined;
+        this.selectedLayer_ = undefined;
       }
 
       get title() {
@@ -93,8 +118,10 @@
       loadCSV(data) {
         let model = new Model();
         model.loadCSV(data);
-        this.selectedShape = undefined;
         this.model = model;
+
+        this.selectedShape = undefined;
+        this.selectedLayer = undefined;
         this.rebuildShapeList_();
         this.selectedShape = this.model.shapes[0];
       }
@@ -103,26 +130,108 @@
         this.$.shapeList.textContent = '';
         this.model.shapes.forEach(function(shape, shapeIdx) {
           let shapeDiv = document.createElement('div');
+          shapeDiv.shape = shape;
           shapeDiv.textContent = 'Shape ' + shapeIdx + ': ' + shape.frequency;
-          this.$.shapeList.appendChild(shapeDiv);
           shapeDiv.addEventListener('click', function() {
             this.selectedShape = shape;
           }.bind(this));
+          this.$.shapeList.appendChild(shapeDiv);
         }, this);
+
+        var activeDiv = utils.findElementWithFieldMatching(this.$.shapeList, 'shape', this.selectedShape_);
+        if (activeDiv)
+          activeDiv.classList.add('item-selected');
       }
 
       get selectedShape() {
         return this.selectedShape_;
       }
       set selectedShape(selectedShape) {
+        if (this.selectedShape_ === selectedShape)
+          return;
+        var activeDiv = utils.findElementWithFieldMatching(this.$.shapeList, 'shape', this.selectedShape_);
+        if (activeDiv)
+          activeDiv.classList.remove('item-selected');
+
         this.selectedShape_ = selectedShape;
-        this.updateShapeViewer_();
+        var activeDiv = utils.findElementWithFieldMatching(this.$.shapeList, 'shape', this.selectedShape_);
+        if (activeDiv)
+          activeDiv.classList.add('item-selected');
+
+        this.rebuildLayerList_();
+        this.$.shapeViewer.shape = this.selectedShape_;
+
+        if (this.selectedShape_)
+          this.selectedLayer = this.selectedShape_.layers[0];
+        else
+          this.selectedLayer = undefined;
       }
 
       updateShapeViewer_() {
-        this.$.shapeViewer.shape = this.selectedShape_;
       }
-      updateSelectionInfo_() {
+
+      rebuildLayerList_() {
+        this.$.layerList.textContent = '';
+        if(this.selectedShape_ === undefined)
+          return;
+        this.selectedShape_.layers.forEach(function(layer, layerIdx) {
+          let layerDiv = document.createElement('div');
+          layerDiv.layer = layer;
+          layerDiv.textContent = 'Layer ' + layerIdx;
+          layerDiv.addEventListener('click', function() {
+            this.selectedLayer = layer;
+          }.bind(this));
+          this.$.layerList.appendChild(layerDiv);
+        }, this);
+        var activeDiv = utils.findElementWithFieldMatching(this.$.layerList, 'layer', this.selectedLayer_);
+        if (activeDiv)
+          activeDiv.classList.add('item-selected');
+      }
+
+      get selectedLayer() {
+        return this.selectedLayer_;
+      }
+      set selectedLayer(selectedLayer) {
+        if (this.selectedLayer_ === selectedLayer)
+          return;
+        var activeDiv = utils.findElementWithFieldMatching(this.$.layerList, 'layer', this.selectedLayer_);
+        if (activeDiv)
+          activeDiv.classList.remove('item-selected');
+
+        this.selectedLayer_ = selectedLayer;
+        this.updateSelectedLayerInfo_();
+        this.$.shapeViewer.selectedLayer = this.selectedLayer_;
+
+        var activeDiv = utils.findElementWithFieldMatching(this.$.layerList, 'layer', this.selectedLayer_);
+        if (activeDiv)
+          activeDiv.classList.add('item-selected');
+      }
+
+      updateSelectedLayerInfo_() {
+        let sli = this.$.selectedLayerInfo;
+        sli.textContent = '';
+        if (this.selectedLayer_ === undefined)
+          return;
+
+        function addRow(v1, v2) {
+          var row = document.createElement('div');
+
+          var v1e = document.createElement('span');
+          v1e.style.width = '200px';
+          v1e.textContent = v1;
+          row.appendChild(v1e);
+
+          var v2e = document.createElement('span');
+          v2e.style.width = '500px';
+          v2e.textContent = v2;
+          row.appendChild(v2e);
+
+          sli.appendChild(row);
+        }
+
+        for (var k in this.selectedLayer_.otherAttrs) {
+          addRow(k, this.selectedLayer_.otherAttrs[k]);
+        }
       }
     }
     customElements.define(ShapeVizElement.is, ShapeVizElement);

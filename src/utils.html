@@ -1,0 +1,13 @@
+<script>
+(function() {
+  window.utils = {};
+  window.utils.findElementWithFieldMatching = function(inElement, fieldName, fieldValue) {
+    for (var i = 0; i < inElement.children.length; i++) {
+      var child = inElement.children[i];
+      if (child[fieldName] === fieldValue)
+        return child;
+    }
+    return undefined;
+  }
+})();
+</script>

@@ -1,5 +1,4 @@
 <link rel="import" href="../third_party/polymer/polymer-element.html">
-<link rel="import" href="./model.html">
 <dom-module id="shapeviewer-element">
 
   <template>
@@ -22,6 +21,7 @@
         super();
         this.textContent = "hello world";
         this.shape_ = undefined;
+        this.selectedLayer_ = undefined;
       }
 
       get shape() {
@@ -33,10 +33,21 @@
         this.redraw_();
       }
 
+      get selectedLayer() {
+        return this.selectedLayer_;
+      }
+      set selectedLayer(selectedLayer) {
+        this.selectedLayer_ = selectedLayer;
+        this.redraw_();
+      }
+
       redraw_() {
-        let r = this.getBoundingClientRect();
-        this.$.canvas.width = r.width;
-        this.$.canvas.height = r.height;
+        //let r = this.getBoundingClientRect();
+        //this.$.canvas.width = r.width;
+        //this.$.canvas.height = r.height;
+        this.$.canvas.width = 300;
+        this.$.canvas.height = 600;
+
         var ctx = this.$.canvas.getContext('2d');
 
         var dpr = window.devicePixelRatio;
@@ -52,13 +63,23 @@
         if (!shape)
           return;
 
+        ctx.strokeWidth = '2px';
         shape.layers.forEach(function(layer) {
-          ctx.strokeStyle = 'green';
-          ctx.strkeWidth = '2px';
+          if (layer === this.selectedLayer) {
+            ctx.strokeStyle = 'rgba(2555, 0, 0, 1)';
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.05)';
+          } else {
+            ctx.strokeStyle = 'rgba(0, 255, 0, 1)';
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.05)';
+          }
+          ctx.fillRect(layer.dstX * modelToScreenScaleFactor,
+                         layer.dstY * modelToScreenScaleFactor,
+                         layer.dstWidth * modelToScreenScaleFactor,
+                         layer.dstHeight * modelToScreenScaleFactor);
           ctx.strokeRect(layer.dstX * modelToScreenScaleFactor,
-                       layer.dstY * modelToScreenScaleFactor,
-                       layer.dstWidth * modelToScreenScaleFactor,
-                       layer.dstHeight * modelToScreenScaleFactor);
+                         layer.dstY * modelToScreenScaleFactor,
+                         layer.dstWidth * modelToScreenScaleFactor,
+                         layer.dstHeight * modelToScreenScaleFactor);
         }, this);
       }
     }

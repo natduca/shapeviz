@@ -47,8 +47,8 @@ class Layer {
     this.dstY = this.ratioToFloat(getField('dstY'));
     this.dstWidth = this.ratioToFloat(getField('dstWidth'));
     this.dstHeight = this.ratioToFloat(getField('dstHeight'));
-    for (let i = 0; i < records; i++) {
-      let fn = getFieldName[i];
+    for (let i = 0; i < records.length; i++) {
+      let fn = getFieldName(i);
       if (fn === undefined) {
         console.log("unknown field");
         continue;
