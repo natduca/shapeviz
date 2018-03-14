@@ -129,7 +129,11 @@
 
       rebuildShapeList_() {
         this.$.shapeList.textContent = '';
-        this.model.shapes.forEach(function(shape, shapeIdx) {
+        let shapes = this.model.shapes.slice();
+        shapes.sort(function(s1, s2) {
+          return s2.frequency - s1.frequency;
+        });
+        shapes.forEach(function(shape, shapeIdx) {
           let shapeDiv = document.createElement('div');
           shapeDiv.shape = shape;
           shapeDiv.textContent = 'Shape ' + shapeIdx + ': ' + shape.frequency;
