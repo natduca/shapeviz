@@ -42,20 +42,19 @@
       }
 
       redraw_() {
-        //let r = this.getBoundingClientRect();
-        //this.$.canvas.width = r.width;
-        //this.$.canvas.height = r.height;
-        this.$.canvas.width = 300;
-        this.$.canvas.height = 600;
+        var dpr = window.devicePixelRatio;
+        this.$.canvas.width = 300*dpr;
+        this.$.canvas.height = 600*dpr;
+        this.$.canvas.style.width = 300 + 'px';
+        this.$.canvas.style.height = 600 + 'px';
 
         var ctx = this.$.canvas.getContext('2d');
 
-        var dpr = window.devicePixelRatio;
-        var w = this.$.canvas.width * dpr;
-        var h = this.$.canvas.height * dpr;
+        var w = this.$.canvas.width;
+        var h = this.$.canvas.height;
 
-        var smallestSide = Math.min(w,h);
-        var modelToScreenScaleFactor = smallestSide;
+        var m2sX = w;
+        var m2sY = h;
 
         ctx.clearRect(0,0,w,h);
 
@@ -63,7 +62,7 @@
         if (!shape)
           return;
 
-        ctx.strokeWidth = '2px';
+        ctx.strokeWidth = '1px';
         shape.layers.forEach(function(layer) {
           if (layer === this.selectedLayer) {
             ctx.strokeStyle = 'rgba(2555, 0, 0, 1)';
@@ -72,14 +71,14 @@
             ctx.strokeStyle = 'rgba(0, 255, 0, 1)';
             ctx.fillStyle = 'rgba(0, 255, 0, 0.05)';
           }
-          ctx.fillRect(layer.dstX * modelToScreenScaleFactor,
-                         layer.dstY * modelToScreenScaleFactor,
-                         layer.dstWidth * modelToScreenScaleFactor,
-                         layer.dstHeight * modelToScreenScaleFactor);
-          ctx.strokeRect(layer.dstX * modelToScreenScaleFactor,
-                         layer.dstY * modelToScreenScaleFactor,
-                         layer.dstWidth * modelToScreenScaleFactor,
-                         layer.dstHeight * modelToScreenScaleFactor);
+          ctx.fillRect(layer.dstX * m2sX,
+                         layer.dstY * m2sY,
+                         layer.dstWidth * m2sX,
+                         layer.dstHeight * m2sY);
+          ctx.strokeRect(layer.dstX * m2sX,
+                         layer.dstY * m2sY,
+                         layer.dstWidth * m2sX,
+                         layer.dstHeight * m2sY);
         }, this);
       }
     }
