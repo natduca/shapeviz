@@ -23,15 +23,24 @@
         flex: 1 1 auto;
         display: flex;
         flex-direction: row;
+        max-height: 800px;
       }
       vbox {
         display: flex;
         flex-direction: column;
+        max-width: 400px;
       }
       lbox {
         display: flex;
         flex-direction: column;
         min-width: 300px;
+        max-width: 400px;
+      }
+      rbox {
+        display: flex;
+        flex-direction: column;
+        min-width: 300px;
+        max-width: 400px;
       }
       hbar {
         display: block;
@@ -42,8 +51,8 @@
       }
       vbar {
         display: block;
-        width: 8px;
         background-color: rgb(175,175,175);
+        width: 8px;       
         border-left: rgb(230,230,230);
         border-right: rgb(64, 64, 64);
       }
@@ -51,6 +60,9 @@
         flex: 1 1 300px;
         display: block;
         overflow-y: auto;
+      }
+      #shapeList > div {
+        display: flex;
       }
       #layerList {
         flex: 1 1 150px;
@@ -63,11 +75,20 @@
       #shapeViewer {
         flex: 1 1 auto;
       }
-      #selectedLayerInfo {
-        flex: 0 0 auto;
-        height: 300px;
+      #selectedShapeInfo {
+        flex: 1 1 300px;
+        display: block;
+        overflow-y: auto;
         user-select: auto;
-        margin: 8px;
+      }
+      #selectedShapeInfo > div {
+        display: flex;
+      }
+      #selectedLayerInfo {
+        flex: 1 1 150px;
+        display: block;
+        overflow-y: auto;
+        user-select: auto;
       }
       #selectedLayerInfo > div {
         display: flex;
@@ -78,23 +99,37 @@
     </style>
     <div id="header"></div>
     <hbox>
+      <vbar></vbar>
       <lbox>
+        <hbar></hbar>
         <div id="shapeList">
-        </div>
+        </div>      
         <hbar></hbar>
         <div id="layerList">
-        </div>
-      </lbox>
-      <vbar></vbar>
-      <vbox>
-        <shapeviewer-element id="shapeViewer">
-        </shapeviewer-element>
+        </div>        
         <hbar></hbar>
+      </lbox>
+      <vbar></vbar>     
+      <rbox>
+        <hbar></hbar>
+        <div id="selectedShapeInfo">
+        current selection
+        </div>
+        <hbar></hbar>        
         <div id="selectedLayerInfo">
         current selection
         </div>
+        <hbar></hbar>
+      </rbox>
+      <vbar></vbar>
+      <vbox>
+        <hbar></hbar>
+        <shapeviewer-element id="shapeViewer">
+        </shapeviewer-element>
+        <hbar></hbar>
       </vbox>
-    </div>
+      <vbar></vbar>
+    </hbox>
   </template>
 
   <script>
@@ -128,15 +163,33 @@
       }
 
       rebuildShapeList_() {
+        let sl = this.$.shapeList;
         this.$.shapeList.textContent = '';
-        let shapes = this.model.shapes.slice();
+        let shapes = this.model.shapes;
         shapes.sort(function(s1, s2) {
           return s2.frequency - s1.frequency;
         });
+
+        function addItem(v1, v2) {
+          var ve = document.createElement('span');
+          ve.style.width = '100px';
+          ve.textContent = v2;
+          v1.appendChild(ve);
+        }
+
+        let row = document.createElement('div');
+        addItem(row, '');
+        addItem(row, 'frequency');
+        addItem(row, 'layerCount');
+        sl.appendChild(row);
+        
         shapes.forEach(function(shape, shapeIdx) {
           let shapeDiv = document.createElement('div');
           shapeDiv.shape = shape;
-          shapeDiv.textContent = 'Shape ' + shapeIdx + ': ' + shape.frequency;
+          shapeDiv.textContent = '';
+          addItem(shapeDiv, 'Shape ' + shapeIdx);
+          addItem(shapeDiv, shape.frequency);
+          addItem(shapeDiv, shape.layerCount)
           shapeDiv.addEventListener('click', function() {
             this.selectedShape = shape;
           }.bind(this));
@@ -163,6 +216,7 @@
         if (activeDiv)
           activeDiv.classList.add('item-selected');
 
+        this.updateSelectedShapeInfo_();
         this.rebuildLayerList_();
         this.$.shapeViewer.shape = this.selectedShape_;
 
@@ -170,6 +224,33 @@
           this.selectedLayer = this.selectedShape_.layers[0];
         else
           this.selectedLayer = undefined;
+      }
+
+      updateSelectedShapeInfo_() {
+        let ssi = this.$.selectedShapeInfo;
+        ssi.textContent = '';
+        if (this.selectedShape_ === undefined)
+          return;
+
+        function addRow(v1, v2) {
+          var row = document.createElement('div');
+
+          var v1e = document.createElement('span');
+          v1e.style.width = '200px';
+          v1e.textContent = v1;
+          row.appendChild(v1e);
+
+          var v2e = document.createElement('span');
+          v2e.style.width = '500px';
+          v2e.textContent = v2;
+          row.appendChild(v2e);
+
+          ssi.appendChild(row);
+        }
+
+        for (var k in this.selectedShape_.otherAttrs) {
+          addRow(k, this.selectedShape_.otherAttrs[k]);
+        }
       }
 
       updateShapeViewer_() {

@@ -43,10 +43,10 @@
 
       redraw_() {
         var dpr = window.devicePixelRatio;
-        this.$.canvas.width = 300*dpr;
-        this.$.canvas.height = 600*dpr;
-        this.$.canvas.style.width = 300 + 'px';
-        this.$.canvas.style.height = 600 + 'px';
+        this.$.canvas.width = 400*dpr;
+        this.$.canvas.height = 800*dpr;
+        this.$.canvas.style.width = 400 + 'px';
+        this.$.canvas.style.height = 800 + 'px';
 
         var ctx = this.$.canvas.getContext('2d');
 
@@ -64,12 +64,11 @@
 
         ctx.strokeWidth = '1px';
         shape.layers.forEach(function(layer) {
+          ctx.strokeStyle = 'rgba(255, 0, 0, 1)';
           if (layer === this.selectedLayer) {
-            ctx.strokeStyle = 'rgba(2555, 0, 0, 1)';
-            ctx.fillStyle = 'rgba(255, 0, 0, 0.05)';
+            ctx.fillStyle = 'rgba(0, 255, 0, 0.5)';
           } else {
-            ctx.strokeStyle = 'rgba(0, 255, 0, 1)';
-            ctx.fillStyle = 'rgba(0, 255, 0, 0.05)';
+            ctx.fillStyle = 'rgba(255, 0, 0, 0.05)';
           }
           ctx.fillRect(layer.dstX * m2sX,
                          layer.dstY * m2sY,

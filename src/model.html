@@ -15,22 +15,25 @@ class Layer {
     }
     let v = parseInt(s);
     if (isNaN(v))
-      throw new Error('omg no');
+      throw new Error('omg no: ' + s);
     return v;
   }
 
   initFromRecords(records) {
     var nameToOffset = {
       layerType: 0,
-      transform: 1,
-      pixelFormat: 2,
-      dataSpace: 3,
-      dstX: 4,
-      dstY: 5,
-      dstWidth: 6,
-      dstHeight: 7,
-      scaleW: 8,
-      scaleH: 9
+      compositionType: 1,
+      isProtected: 2,
+      transform: 3,
+      pixelFormat: 4,
+      dataSpace: 5,
+      dstX: 6,
+      dstY: 7,
+      dstWidth: 8,
+      dstHeight: 9,
+      scaleW: 10,
+      scaleH: 11,
+      alpha: 12
     }
     function getField(name){
       return records[nameToOffset[name]];
@@ -59,8 +62,41 @@ class Layer {
 }
 class Shape {
   constructor() {
+    this.numRecords = 5; // Number of attrs for Shape
     this.frequency = 0;
+    this.layerCount = 0;
+    this.otherAttrs = {};
     this.layers = [];
+  }
+  initFromRecords(records) {
+    var nameToOffset = {
+      frequency: 0,
+      layerCount: 1,
+      colorMode: 2,
+      colorTransform: 3,
+      screenRotation: 4,
+    }
+    function getField(name){
+      return records[nameToOffset[name]];
+    }
+    function getFieldName(idx){
+      for (let k in nameToOffset) {
+        if (nameToOffset[k] === idx)
+          return k;
+      }
+      return undefined;
+    }
+
+    this.frequency = parseInt(getField('frequency'));
+    this.layerCount = parseInt(getField('layerCount'));
+    for (let i = 2; i < records.length; i++) {
+      let fn = getFieldName(i);
+      if (fn === undefined) {
+        console.log("unknown field");
+        continue;
+      }
+      this.otherAttrs[fn] = records[i];
+    }
   }
 }
 
@@ -75,14 +111,15 @@ class Model {
       if (line.length === 0)
         return;
       let records = line.split(',');
+      if (isNaN(parseInt(records[0])))
+        return;
 
-
-      let numLayers = parseInt(records[1]);
-      var numPropsInLayer = (records.length - 2) / numLayers;
       let shape = new Shape();
-      shape.frequency = parseInt(records[0]);
-      for (let i = 0; i < numLayers; i++) {
-        let baseIndex = (i * numPropsInLayer) + 2;
+      let shapeRecords = records.slice(0, shape.numRecords);
+      shape.initFromRecords(shapeRecords);
+      var numPropsInLayer = (records.length - shape.numRecords) / shape.layerCount;
+      for (let i = 0; i < shape.layerCount; i++) {
+        let baseIndex = (i * numPropsInLayer) + shape.numRecords;
         let layerRecords = records.slice(baseIndex,
                                          baseIndex + numPropsInLayer);
         let layer = new Layer();
