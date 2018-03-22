@@ -221,14 +221,27 @@
           if (event.defaultPrevented) {
             return;
           }
+          function scrollIntoViewIfNeeded(el) {
+            const pr = el.parentElement.getBoundingClientRect();
+            const cr = el.getBoundingClientRect();
+            if (cr.top < pr.top) {
+              el.scrollIntoView(true);
+            } else if (cr.bottom > pr.bottom) {
+              el.scrollIntoView(false);
+            }
+          }
           switch (event.key) {
             case "ArrowDown":
               this.selectedShapeIdx = this.selectedShapeIdx + 1;
               this.selectedShape = this.model.shapes[this.selectedShapeIdx];
+              var activeDiv = utils.findElementWithFieldMatching(this.$.shapeList, 'shape', this.selectedShape_);
+              scrollIntoViewIfNeeded(activeDiv);
               break;
             case "ArrowUp":
               this.selectedShapeIdx = this.selectedShapeIdx - 1;
               this.selectedShape = this.model.shapes[this.selectedShapeIdx];
+              var activeDiv = utils.findElementWithFieldMatching(this.$.shapeList, 'shape', this.selectedShape_);
+              scrollIntoViewIfNeeded(activeDiv);
               break;
             default:
               return;
