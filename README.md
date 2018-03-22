@@ -16,9 +16,9 @@ You should be good to go.
 
 Running shapeviz
 ---
-
+```
 ./bin/shapeviz test_data/layerstats_032118.csv
-
+```
 
 Contributing to shapeviz
 ---
