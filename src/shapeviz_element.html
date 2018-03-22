@@ -33,14 +33,26 @@
       lbox {
         display: flex;
         flex-direction: column;
-        min-width: 300px;
-        max-width: 400px;
+        min-width: 400px;
+        max-width: 800px;
       }
-      rbox {
+      ttbox {
         display: flex;
-        flex-direction: column;
-        min-width: 300px;
-        max-width: 400px;
+        flex-direction: row;
+        height: 20px;
+        max-width: 800px;
+      }
+      tbox {
+        display: flex;
+        flex-direction: row;
+        height: 400px;
+        max-width: 800px;
+      }
+      bbox {
+        display: flex;
+        flex-direction: row;
+        height: 400px;
+        max-width: 800px;
       }
       hbar {
         display: block;
@@ -55,6 +67,14 @@
         width: 8px;       
         border-left: rgb(230,230,230);
         border-right: rgb(64, 64, 64);
+      }
+      #headList {
+        flex: 1 1 100px;
+        display: block;
+        overflow-y: auto;
+      }
+      #headList > div {
+        display: flex;
       }
       #shapeList {
         flex: 1 1 300px;
@@ -75,17 +95,8 @@
       #shapeViewer {
         flex: 1 1 auto;
       }
-      #selectedShapeInfo {
-        flex: 1 1 300px;
-        display: block;
-        overflow-y: auto;
-        user-select: auto;
-      }
-      #selectedShapeInfo > div {
-        display: flex;
-      }
       #selectedLayerInfo {
-        flex: 1 1 150px;
+        flex: 1 1 300px;
         display: block;
         overflow-y: auto;
         user-select: auto;
@@ -102,25 +113,25 @@
       <vbar></vbar>
       <lbox>
         <hbar></hbar>
-        <div id="shapeList">
-        </div>      
+        <ttbox>
+          <div id="headList">
+          </div>
+        </ttbox>
+        <tbox>
+          <div id="shapeList">
+          </div>
+        </tbox>
         <hbar></hbar>
-        <div id="layerList">
-        </div>        
+        <bbox>
+          <div id="layerList">
+          </div> 
+          <vbar></vbar>     
+          <div id="selectedLayerInfo">
+          current selection
+          </div>
+        </bbox>
         <hbar></hbar>
       </lbox>
-      <vbar></vbar>     
-      <rbox>
-        <hbar></hbar>
-        <div id="selectedShapeInfo">
-        current selection
-        </div>
-        <hbar></hbar>        
-        <div id="selectedLayerInfo">
-        current selection
-        </div>
-        <hbar></hbar>
-      </rbox>
       <vbar></vbar>
       <vbox>
         <hbar></hbar>
@@ -163,6 +174,8 @@
       }
 
       rebuildShapeList_() {
+        let tsl = this.$.headList;
+        this.$.headList.textContent = '';
         let sl = this.$.shapeList;
         this.$.shapeList.textContent = '';
         let shapes = this.model.shapes;
@@ -172,24 +185,28 @@
 
         function addItem(v1, v2) {
           var ve = document.createElement('span');
-          ve.style.width = '100px';
+          ve.style.width = '120px';
           ve.textContent = v2;
           v1.appendChild(ve);
         }
 
         let row = document.createElement('div');
+        let shapeAttrList = this.model.shapeAttrList;
         addItem(row, '');
-        addItem(row, 'frequency');
-        addItem(row, 'layerCount');
-        sl.appendChild(row);
-        
+        shapeAttrList.forEach(function(attr) {
+          addItem(row, attr);
+        }, this);
+        tsl.appendChild(row);
+
         shapes.forEach(function(shape, shapeIdx) {
           let shapeDiv = document.createElement('div');
           shapeDiv.shape = shape;
           shapeDiv.textContent = '';
           addItem(shapeDiv, 'Shape ' + shapeIdx);
-          addItem(shapeDiv, shape.frequency);
-          addItem(shapeDiv, shape.layerCount)
+          let attrs = shape.otherAttrs;
+          attrs.forEach(function(attr) {
+            addItem(shapeDiv, attr);
+          }, this);
           shapeDiv.addEventListener('click', function() {
             this.selectedShape = shape;
           }.bind(this));
@@ -216,7 +233,6 @@
         if (activeDiv)
           activeDiv.classList.add('item-selected');
 
-        this.updateSelectedShapeInfo_();
         this.rebuildLayerList_();
         this.$.shapeViewer.shape = this.selectedShape_;
 
@@ -224,33 +240,6 @@
           this.selectedLayer = this.selectedShape_.layers[0];
         else
           this.selectedLayer = undefined;
-      }
-
-      updateSelectedShapeInfo_() {
-        let ssi = this.$.selectedShapeInfo;
-        ssi.textContent = '';
-        if (this.selectedShape_ === undefined)
-          return;
-
-        function addRow(v1, v2) {
-          var row = document.createElement('div');
-
-          var v1e = document.createElement('span');
-          v1e.style.width = '200px';
-          v1e.textContent = v1;
-          row.appendChild(v1e);
-
-          var v2e = document.createElement('span');
-          v2e.style.width = '500px';
-          v2e.textContent = v2;
-          row.appendChild(v2e);
-
-          ssi.appendChild(row);
-        }
-
-        for (var k in this.selectedShape_.otherAttrs) {
-          addRow(k, this.selectedShape_.otherAttrs[k]);
-        }
       }
 
       updateShapeViewer_() {

@@ -19,22 +19,7 @@ class Layer {
     return v;
   }
 
-  initFromRecords(records) {
-    var nameToOffset = {
-      layerType: 0,
-      compositionType: 1,
-      isProtected: 2,
-      transform: 3,
-      pixelFormat: 4,
-      dataSpace: 5,
-      dstX: 6,
-      dstY: 7,
-      dstWidth: 8,
-      dstHeight: 9,
-      scaleW: 10,
-      scaleH: 11,
-      alpha: 12
-    }
+  initFromRecords(records, nameToOffset) {
     function getField(name){
       return records[nameToOffset[name]];
     }
@@ -46,10 +31,10 @@ class Layer {
       return undefined;
     }
 
-    this.dstX = this.ratioToFloat(getField('dstX'));
-    this.dstY = this.ratioToFloat(getField('dstY'));
-    this.dstWidth = this.ratioToFloat(getField('dstWidth'));
-    this.dstHeight = this.ratioToFloat(getField('dstHeight'));
+    this.dstX = this.ratioToFloat(getField('DstX'));
+    this.dstY = this.ratioToFloat(getField('DstY'));
+    this.dstWidth = this.ratioToFloat(getField('DstWidth'));
+    this.dstHeight = this.ratioToFloat(getField('DstHeight'));
     for (let i = 0; i < records.length; i++) {
       let fn = getFieldName(i);
       if (fn === undefined) {
@@ -61,21 +46,14 @@ class Layer {
   }
 }
 class Shape {
-  constructor() {
-    this.numRecords = 5; // Number of attrs for Shape
+  constructor(num) {
+    this.numRecords = num; // Number of attrs for Shape
     this.frequency = 0;
     this.layerCount = 0;
     this.otherAttrs = {};
     this.layers = [];
   }
-  initFromRecords(records) {
-    var nameToOffset = {
-      frequency: 0,
-      layerCount: 1,
-      colorMode: 2,
-      colorTransform: 3,
-      screenRotation: 4,
-    }
+  initFromRecords(records, nameToOffset) {
     function getField(name){
       return records[nameToOffset[name]];
     }
@@ -86,44 +64,61 @@ class Shape {
       }
       return undefined;
     }
-
-    this.frequency = parseInt(getField('frequency'));
-    this.layerCount = parseInt(getField('layerCount'));
-    for (let i = 2; i < records.length; i++) {
-      let fn = getFieldName(i);
-      if (fn === undefined) {
-        console.log("unknown field");
-        continue;
-      }
-      this.otherAttrs[fn] = records[i];
-    }
+    this.frequency = parseInt(getField('Frequency'));
+    this.layerCount = parseInt(getField('LayerCount'));
+    this.otherAttrs = records;
   }
 }
 
 class Model {
   constructor() {
     this.shapes = [];
+    this.shapeAttrList = [];
+    this.shapeNameToOffset = {};
+    this.layerAttrList = [];
+    this.layerNameToOffset = {};
   }
   loadCSV(data) {
     let lines = data.split('\n');
+
+    let i = 0;
+    for (let k = 0; i < lines.length; ++i) {
+      let line = lines[i].trim();
+      if (line.length === 0)
+        continue;
+      ++k;
+      if (k === 1) {
+        this.shapeAttrList = line.split(',');
+        this.shapeAttrList.forEach(function(attr, attrIdx) {
+          this.shapeNameToOffset[attr] = attrIdx;
+        }, this);
+        continue;
+      }
+      if (k === 2) {
+        this.layerAttrList = line.split(',');
+        this.layerAttrList.forEach(function(attr, attrIdx) {
+          this.layerNameToOffset[attr] = attrIdx;
+        }, this);
+        break;
+      }
+    }
+
+    lines = lines.slice(i + 1);
     lines.forEach(function(line) {
       line = line.trim();
       if (line.length === 0)
         return;
       let records = line.split(',');
-      if (isNaN(parseInt(records[0])))
-        return;
-
-      let shape = new Shape();
+      let shape = new Shape(this.shapeAttrList.length);
       let shapeRecords = records.slice(0, shape.numRecords);
-      shape.initFromRecords(shapeRecords);
-      var numPropsInLayer = (records.length - shape.numRecords) / shape.layerCount;
+      shape.initFromRecords(shapeRecords, this.shapeNameToOffset);
+      let numPropsInLayer = this.layerAttrList.length;
       for (let i = 0; i < shape.layerCount; i++) {
         let baseIndex = (i * numPropsInLayer) + shape.numRecords;
         let layerRecords = records.slice(baseIndex,
                                          baseIndex + numPropsInLayer);
         let layer = new Layer();
-        layer.initFromRecords(layerRecords);
+        layer.initFromRecords(layerRecords, this.layerNameToOffset);
         shape.layers.push(layer);
       }
       this.shapes.push(shape);
